@@ -45,7 +45,13 @@ NIF/CIF inválido · NIF repetido · posible cliente duplicado · cliente sin co
 - Los 7 NIF inválidos son CIF inventados por mí al generar el ejemplo. El validador está comprobado con DNI, NIE y CIF reales conocidos.
 - Los 8 móviles inválidos son teléfonos fijos (976…) guardados en el campo móvil, normalmente de empresas.
 
-## Pruebas automáticas (49, todas superadas)
+## Comisiones y recibos devueltos (nuevo)
+**Comisiones (solo administrador).** La pantalla «Comisiones» lista cada compañía y ramo de la cartera con su porcentaje estándar. Todas las pólizas de esa compañía y ramo lo heredan. Si una póliza tiene condiciones distintas, en su ficha se pone un % propio (y se puede volver al estándar con un botón). La comisión en euros se calcula siempre sobre la **prima neta** y se recalcula sola al cambiar el estándar, el % de la póliza o la prima (por ejemplo, tras una nueva carga de datos). Una póliza puede tener un colaborador o tercero con su parte (en % de la comisión); lo que queda es la parte de la correduría. Si no hay estándar ni % propio, se usa el que traía el Excel del programa anterior, y la ficha indica de dónde sale cada porcentaje. Todos los cambios quedan en el registro de actividad. *Supuesto por confirmar:* la parte del colaborador se calcula sobre la comisión de la correduría.
+
+**Recibos devueltos (empleados y administrador).** En la ficha de cada póliza hay un formulario: fecha de devolución, importe, recibo (opcional) y motivo. Al registrarlo se avisa por correo a los administradores (en la prueba, el aviso queda en «Enviados → Avisos al despacho»), el recibo pasa a «Devuelto» y la renovación de esa póliza queda retenida hasta regularizarlo. No se aceptan fechas futuras, importes vacíos o negativos, motivos vacíos ni devoluciones repetidas.
+
+## Pruebas automáticas (74, todas superadas)
+Las 25 nuevas cubren: cálculo sobre prima neta, herencia del estándar, % propio, recálculo al cambiar la prima, reimportación sin pisar lo puesto a mano, reparto con colaborador, porcentajes inválidos, permisos (el empleado no ve ni cambia comisiones), registro de devoluciones, avisos, retención de la renovación y rechazo de datos incorrectos.
 Incluyen una cartera limpia (0 errores), una cartera con 20 errores sembrados (se detectan exactamente esos y ninguno más), reimportación sin duplicados, cierre y reapertura de incidencias, aislamiento entre despachos y registro inmutable. Las pantallas se prueban con todas las fichas del ejemplo (44 clientes y 79 pólizas), los roles, las cifras en pantalla y el aislamiento entre despachos. Las renovaciones se prueban con escenarios construidos (umbrales, plazos, canales, retenciones, caducidad de enlaces) y contra un cálculo independiente con pandas sobre el ejemplo. Se rompieron reglas a propósito (el umbral de ahorro y la validación de textos) y las pruebas fallaron. La demo navegable, con aprobación y descargas, se probó en un navegador real sin pantalla. Para comprobar que las pruebas valen, rompí a propósito una regla y la prueba falló.
 
 ## Qué todavía no está hecho
@@ -57,7 +63,8 @@ Incluyen una cartera limpia (0 errores), una cartera con 20 errores sembrados (s
 - Mensajes para las compañías tras la respuesta del cliente.
 - Revisión diaria programada (ahora se ejecuta a mano).
 - La tecnología definitiva: esta prueba usa Python y SQLite. El producto real usaría PostgreSQL alojado en la Unión Europea.
-- Los recibos devueltos aún no tienen estados de gestión (fase 6).
+- Los recibos devueltos todavía no tienen estados de gestión (por ejemplo «cliente contactado» o «regularizado»); hoy solo se registran y se avisa.
+- Panel económico del administrador (clientes, primas, comisiones y margen) y liquidaciones con las compañías.
 
 ## Cómo ejecutarla
     cd saas

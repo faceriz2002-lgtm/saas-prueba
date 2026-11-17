@@ -25,6 +25,11 @@ CREATE TABLE IF NOT EXISTS poliza (
   comision_pct REAL, comision_anual REAL, mediador TEXT, renovable INTEGER, origen TEXT,
   fecha_anulacion TEXT, motivo_anulacion TEXT, observaciones TEXT,
   no_en_ultimo_export INTEGER NOT NULL DEFAULT 0, importacion_id INTEGER,
+  -- Comisión (la fija la correduría, no el documento de la póliza). Las columnas «propia» y «colaborador» las escribe
+  -- la aplicación; las «aplicada» se recalculan solas cuando cambia la prima neta o el porcentaje.
+  comision_pct_propia REAL, colaborador TEXT, colaborador_pct REAL,
+  comision_pct_aplicada REAL, comision_origen TEXT, comision_aplicada REAL,
+  comision_colaborador REAL, comision_correduria REAL,
   UNIQUE (despacho_id, num_poliza));
 CREATE TABLE IF NOT EXISTS riesgo (
   id INTEGER PRIMARY KEY, despacho_id INTEGER NOT NULL, cod TEXT NOT NULL,
@@ -102,3 +107,19 @@ CREATE TABLE IF NOT EXISTS token_respuesta (
 CREATE TABLE IF NOT EXISTS plantilla_validacion (
   despacho_id INTEGER NOT NULL, tipo TEXT NOT NULL, version TEXT NOT NULL,
   validada_por INTEGER NOT NULL, validada_en TEXT NOT NULL, PRIMARY KEY (despacho_id, tipo));
+-- Comisión estándar pactada con cada compañía para cada ramo; cada póliza la hereda salvo que tenga una propia.
+CREATE TABLE IF NOT EXISTS comision_estandar (
+  despacho_id INTEGER NOT NULL, compania TEXT NOT NULL, ramo TEXT NOT NULL,
+  pct REAL NOT NULL CHECK (pct >= 0 AND pct <= 100), actualizado TEXT NOT NULL, usuario_id INTEGER,
+  PRIMARY KEY (despacho_id, compania, ramo));
+-- Recibos devueltos que la compañía comunica y el empleado registra a mano.
+CREATE TABLE IF NOT EXISTS devolucion_recibo (
+  id INTEGER PRIMARY KEY, despacho_id INTEGER NOT NULL, num_poliza TEXT NOT NULL, cod_recibo TEXT,
+  fecha_devolucion TEXT NOT NULL, importe REAL NOT NULL CHECK (importe > 0), motivo TEXT NOT NULL,
+  registrada_por INTEGER, registrada_en TEXT NOT NULL,
+  UNIQUE (despacho_id, num_poliza, fecha_devolucion, importe));
+-- Avisos que la aplicación manda al propio despacho (en la prueba, solo simulados).
+CREATE TABLE IF NOT EXISTS aviso_interno (
+  id INTEGER PRIMARY KEY, despacho_id INTEGER NOT NULL, tipo TEXT NOT NULL, ref TEXT,
+  destinatario TEXT NOT NULL, asunto TEXT NOT NULL, cuerpo TEXT NOT NULL,
+  modo TEXT NOT NULL, enviado_en TEXT NOT NULL);

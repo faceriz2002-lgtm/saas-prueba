@@ -4,7 +4,7 @@ from corredur.db import conectar, crear_despacho
 from corredur.importador import importar
 from corredur import salud
 
-ruta = sys.argv[1] if len(sys.argv) > 1 else "../export_ejemplo_correduria.xlsx"
+ruta = sys.argv[1] if len(sys.argv) > 1 else "export_ejemplo_correduria.xlsx"
 con = conectar()
 did, uid = crear_despacho(con, "Despacho piloto (ejemplo)")
 r = importar(con, did, ruta, uid)

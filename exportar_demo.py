@@ -13,7 +13,7 @@ HOY = date(2026, 11, 14)
 con = conectar()
 did, admin = crear_despacho(con, "Despacho piloto (ejemplo)", "Administrador", "admin@despacho.test")
 emp = crear_usuario(con, did, "Laura (empleada)", "laura@despacho.test", "empleado", admin)
-importar(con, did, "../export_ejemplo_correduria.xlsx", admin)
+importar(con, did, "export_ejemplo_correduria.xlsx", admin)
 salud.revisar(con, did, hoy=HOY, usuario_id=admin)
 R.detectar(con, did, HOY, admin)
 for tipo in C.TEXTOS:                      # el administrador ya ha validado los textos
@@ -23,7 +23,7 @@ app = crear_app(con, did, hoy=HOY)
 rutas_comunes = ["/renovaciones"] + [f"/renovacion/{r['id']}" for r in con.execute("SELECT id FROM renovacion WHERE estado<>'cerrada' ORDER BY id")] \
               + ["/clientes"] + [f"/cliente/{r['cod']}" for r in con.execute("SELECT cod FROM cliente ORDER BY cod")] \
               + [f"/poliza/{r['num_poliza']}" for r in con.execute("SELECT num_poliza FROM poliza ORDER BY num_poliza")]
-rutas_admin = ["/salud"] + [f"/salud/{r}" for r in salud.REGLAS] + ["/salida"] + rutas_comunes
+rutas_admin = ["/salud"] + [f"/salud/{r}" for r in salud.REGLAS] + ["/comisiones", "/salida"] + rutas_comunes
 roles = {"admin": (admin, rutas_admin, "/salud"), "emp": (emp, rutas_comunes, "/renovaciones")}
 ids = {admin: "admin", emp: "emp"}
 
