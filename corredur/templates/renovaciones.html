@@ -1,0 +1,20 @@
+{% extends "base.html" %}{% set seccion='renovaciones' %}{% block titulo %}Renovaciones{% endblock %}
+{% block cuerpo %}
+<h1>Renovaciones</h1>
+<div class="cifras">
+ <div class="cifra {{ 'alta' if cuenta['preparada'] else '' }}"><b>{{ cuenta['preparada'] }}</b><span>listas para aprobar</span></div>
+ <div class="cifra"><b>{{ cuenta['enviada'] }}</b><span>enviadas</span></div>
+ <div class="cifra ok"><b>{{ cuenta['respondida'] }}</b><span>respondidas</span></div>
+ <div class="cifra media"><b>{{ cuenta['pendiente'] }}</b><span>a gestionar a mano</span></div>
+</div>
+{% if ahorro %}<p class="nota">Ahorro potencial de las renovaciones con ofertas: {{ ahorro|eur }} al año para los clientes.</p>{% endif %}
+<div class="tarjeta tabla"><table>
+<tr><th>Póliza</th><th>Vence</th><th>Aviso</th><th>Estado</th></tr>
+{% for r, dias, nombre in filas %}<tr>
+<td><a href="{{ url_for('renovacion', rid=r['id']) }}">{{ r['num_poliza'] }}</a><br><span class="nota">{{ nombre }} · {{ r['compania'] }}</span></td>
+<td>{{ r['fecha_vencimiento']|fecha }}<br><span class="nota">en {{ dias }} días</span></td>
+<td>{{ TIPOS[r['tipo']] }}{% if r['ahorro_max'] %}<br><span class="nota">hasta {{ r['ahorro_max']|eur }}</span>{% endif %}</td>
+<td><span class="etq {{ 'ok' if r['estado'] in ('enviada','respondida') else 'alta' if r['estado']=='preparada' else 'media' }}" data-reno-estado="{{ r['id'] }}">{{ ESTADOS[r['estado']] }}</span></td></tr>
+{% else %}<tr><td colspan="4" class="vacio">No hay renovaciones en curso.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

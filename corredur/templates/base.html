@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block titulo %}Renovaciones{% endblock %} · {{ despacho }}</title>
+<style>
+:root{--fondo:#f6f5f2;--tarjeta:#fff;--texto:#1f2430;--suave:#6b7280;--linea:#e5e3dd;--marca:#1f4e79;--alta:#b42318;--alta-f:#fdecea;--media:#a15c00;--media-f:#fff4e0;--ok:#1a7f4b;--ok-f:#e6f4ec}
+*{box-sizing:border-box}body{margin:0;font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--fondo);color:var(--texto)}
+a{color:var(--marca);text-decoration:none}a:hover{text-decoration:underline}
+header{background:var(--marca);color:#fff;padding:12px 16px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;position:sticky;top:0;z-index:5}
+header .marca{font-weight:700}header nav{display:flex;gap:14px;flex:1}header nav a{color:#fff;opacity:.9;padding:4px 0}header nav a.act{border-bottom:2px solid #fff;opacity:1}
+.rol{font-size:13px;opacity:.85}
+main{max-width:920px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 14px}h2{font-size:17px;margin:22px 0 8px}
+.tarjeta{background:var(--tarjeta);border:1px solid var(--linea);border-radius:12px;padding:14px;margin-bottom:12px}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px;margin-bottom:12px}
+.cifra{background:var(--tarjeta);border:1px solid var(--linea);border-radius:12px;padding:12px}.cifra b{display:block;font-size:28px;line-height:1.1}.cifra span{color:var(--suave);font-size:13px}
+.cifra.alta b{color:var(--alta)}.cifra.media b{color:var(--media)}.cifra.ok b{color:var(--ok)}
+.etq{display:inline-block;font-size:12px;font-weight:600;padding:2px 8px;border-radius:999px;border:1px solid var(--linea);background:#f0efec;white-space:nowrap}
+.etq.alta{background:var(--alta-f);color:var(--alta);border-color:#f3c2bd}.etq.media{background:var(--media-f);color:var(--media);border-color:#f1d3a1}.etq.ok{background:var(--ok-f);color:var(--ok);border-color:#bfe3cf}
+.aviso{border-left:4px solid var(--media);background:var(--media-f);padding:10px 12px;border-radius:8px;margin-bottom:10px}.aviso.alta{border-color:var(--alta);background:var(--alta-f)}
+.aviso b{display:block}
+table{width:100%;border-collapse:collapse;font-size:14px}th{text-align:left;color:var(--suave);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+th,td{padding:8px 6px;border-bottom:1px solid var(--linea);vertical-align:top}tr:last-child td{border-bottom:0}
+.tabla{overflow-x:auto}.num{text-align:right;white-space:nowrap}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;margin:0}dt{color:var(--suave)}dd{margin:0}
+input[type=search]{width:100%;padding:11px 12px;border:1px solid var(--linea);border-radius:10px;font-size:16px;margin-bottom:12px}
+.vacio{color:var(--suave)}.nota{color:var(--suave);font-size:13px}
+.btn{display:inline-block;padding:7px 12px;border-radius:9px;background:var(--marca);color:#fff!important;font-size:14px;font-weight:600;border:0;cursor:pointer;text-decoration:none!important}.btn.sec{background:#fff;color:var(--marca)!important;border:1px solid var(--marca)}.btn[disabled]{opacity:.5;cursor:not-allowed}
+.demo{font-size:12px;color:var(--suave);text-align:center;padding:18px 8px}
+</style></head><body>
+<header><span class="marca">{{ despacho }}</span>
+<nav>{% if admin %}<a href="{{ url_for('salud') }}" class="{{ 'act' if seccion=='salud' }}">Salud de la cartera{% if n_abiertas %} ({{ n_abiertas }}){% endif %}</a>{% endif %}
+<a href="{{ url_for('renovaciones') }}" class="{{ 'act' if seccion=='renovaciones' }}">Renovaciones{% if n_prep %} ({{ n_prep }}){% endif %}</a>
+<a href="{{ url_for('clientes') }}" class="{{ 'act' if seccion=='clientes' }}">Clientes</a>{% if admin %}<a href="{{ url_for('salida') }}" class="{{ 'act' if seccion=='salida' }}">Enviados</a>{% endif %}</nav>
+<span class="rol">{% if usuario %}{{ usuario['nombre'] }}{% if usuario['nombre']|lower != usuario['rol']|lower and usuario['rol'] not in usuario['nombre']|lower %} · {{ usuario['rol'] }}{% endif %}{% endif %}</span></header>
+<main>{% block cuerpo %}{% endblock %}
+<p class="demo">Datos 100 % ficticios · demostración
+{% for u in usuarios %}· <a href="{{ url_for('entrar', uid=u['id']) }}">ver como {{ u['rol'] }}</a>{% endfor %}</p></main></body></html>

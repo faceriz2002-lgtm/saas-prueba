@@ -1,0 +1,34 @@
+{% extends "base.html" %}{% set seccion='clientes' %}{% block titulo %}{{ nombre }}{% endblock %}
+{% block cuerpo %}
+<p><a href="{{ url_for('clientes') }}">← Clientes</a></p>
+<h1>{{ nombre }}</h1>
+{% if c['no_en_ultimo_export'] %}<div class="aviso"><b>No aparece en el último export</b>La ficha se mantiene; no se borra nada automáticamente.</div>{% endif %}
+{% if sin %}<div class="aviso"><b>{{ sin|length }} siniestro{{ 's' if sin|length>1 }} en los últimos 2 años</b>Detalle más abajo y en el historial de cada póliza.</div>{% endif %}
+{% if recibos_dev %}<div class="aviso alta"><b>{{ recibos_dev|length }} recibo{{ 's' if recibos_dev|length>1 }} devuelto{{ 's' if recibos_dev|length>1 }} o impagado{{ 's' if recibos_dev|length>1 }}</b>{% for r in recibos_dev %}<a href="{{ url_for('poliza', num=r['num_poliza']) }}">{{ r['num_recibo'] }}</a> ({{ r['estado_cobro'].lower() }}){{ ', ' if not loop.last }}{% endfor %}</div>{% endif %}
+{% if admin and incid %}<div class="aviso"><b>Errores de datos de esta ficha</b>{% for i in incid %}{{ i['regla'].replace('_',' ').lower() }}: {{ i['detalle'] }}{{ '; ' if not loop.last }}{% endfor %}</div>{% endif %}
+<div class="tarjeta"><dl>
+<dt>Tipo</dt><dd>{{ c['tipo'] or '—' }}</dd><dt>NIF/CIF</dt><dd>{{ c['nif'] or '—' }}</dd>
+<dt>Móvil</dt><dd>{{ c['telefono_movil'] or '—' }}</dd><dt>Otro teléfono</dt><dd>{{ c['telefono_2'] or '—' }}</dd>
+<dt>Correo</dt><dd>{{ c['email'] or '—' }}</dd>
+<dt>Dirección</dt><dd>{{ c['direccion'] or '—' }}, {{ c['cod_postal'] or '' }} {{ c['poblacion'] or '' }}</dd>
+<dt>WhatsApp</dt><dd>{{ 'Acepta' if c['acepta_whatsapp']==1 else 'No acepta' if c['acepta_whatsapp']==0 else '—' }}</dd>
+<dt>Comunicaciones comerciales</dt><dd>{{ 'Acepta' if c['acepta_comerciales']==1 else 'No acepta' if c['acepta_comerciales']==0 else '—' }}</dd>
+<dt>Mediador</dt><dd>{{ c['mediador'] or '—' }}</dd><dt>Cliente desde</dt><dd>{{ c['fecha_alta']|fecha }}</dd>
+</dl></div>
+<h2>Pólizas</h2>
+<div class="tarjeta tabla"><table>
+<tr><th>Póliza</th><th>Estado</th><th>Vence</th><th class="num">Prima</th></tr>
+{% for p in pols %}<tr>
+<td><a href="{{ url_for('poliza', num=p['num_poliza']) }}">{{ p['num_poliza'] }}</a><br><span class="nota">{{ p['ramo'] }} · {{ p['compania'] }}</span></td>
+<td><span class="etq {{ '' if p['estado']=='En vigor' else 'alta' if p['estado'] in ('Anulada','Suspendida') else 'media' }}">{{ p['estado'] }}</span>{% if p['no_en_ultimo_export'] %}<br><span class="nota">no aparece en el último export</span>{% endif %}</td>
+<td>{{ p['fecha_vencimiento']|fecha }}</td><td class="num">{{ p['prima_total']|eur }}</td></tr>
+{% else %}<tr><td colspan="4" class="vacio">Sin pólizas.</td></tr>{% endfor %}</table></div>
+<h2>Siniestros (últimos 2 años)</h2>
+<div class="tarjeta tabla">{% if sin %}<table><tr><th>Fecha</th><th>Tipo</th><th>Estado</th><th class="num">Pagado</th></tr>
+{% for s in sin %}<tr><td>{{ s['fecha_ocurrencia']|fecha }}</td><td>{{ s['tipo'] }}<br><span class="nota">{{ s['num_poliza'] }}</span></td><td>{{ s['estado'] }}</td><td class="num">{{ s['importe_pagado']|eur }}</td></tr>{% endfor %}</table>
+{% else %}<span class="vacio">Sin siniestros en los últimos 2 años.</span>{% endif %}</div>
+{% if vinc %}<h2>Vinculados</h2><div class="tarjeta">{% for v in vinc %}{{ v['relacion'] }}: <a href="{{ url_for('cliente', cod=v['cod']) }}">{{ v['razon_social'] or (v['nombre'] ~ ' ' ~ v['apellido1'] ~ ' ' ~ (v['apellido2'] or '')) }}</a>{{ '<br>'|safe if not loop.last }}{% endfor %}</div>{% endif %}
+<h2>Documentos</h2>
+<div class="tarjeta tabla"><table><tr><th>Tipo</th><th>Fichero</th><th>Fecha</th><th></th></tr>
+{% for d in docs %}<tr><td>{{ d['tipo'] }}</td><td class="nota">{{ d['nombre_fichero'] }}</td><td>{{ d['fecha']|fecha }}</td><td class="num">{% if d['tipo'] in descargables %}<a class="btn" href="{{ url_for('descargar_documento', cod=d['cod']) }}">Descargar</a>{% endif %}</td></tr>{% else %}<tr><td colspan="4" class="vacio">Sin documentos.</td></tr>{% endfor %}</table></div>
+{% endblock %}

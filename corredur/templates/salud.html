@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% set seccion='salud' %}{% block titulo %}Salud de la cartera{% endblock %}
+{% block cuerpo %}
+<h1>Salud de la cartera</h1>
+<div class="cifras">
+ <div class="cifra {{ 'ok' if n_abiertas==0 else '' }}"><b>{{ n_abiertas }}</b><span>errores abiertos</span></div>
+ <div class="cifra alta"><b>{{ por_sev['alta'] }}</b><span>graves</span></div>
+ <div class="cifra media"><b>{{ por_sev['media'] }}</b><span>a revisar</span></div>
+ <div class="cifra"><b>{{ n_clientes }} · {{ n_polizas }}</b><span>clientes · pólizas</span></div>
+</div>
+{% if rev %}<p class="nota">Última revisión automática: {{ rev['fecha'].replace('T',' ') }} · {{ rev['nuevas'] }} nuevos, {{ rev['resueltas'] }} resueltos. Se revisa cada día y tras cada subida de datos.</p>{% endif %}
+{% if resumen %}
+<div class="tarjeta tabla"><table>
+<tr><th>Error</th><th>Gravedad</th><th class="num">Casos</th></tr>
+{% for regla, sev, n, desc in resumen %}
+<tr><td><a href="{{ url_for('salud_regla', regla=regla) }}">{{ desc }}</a></td><td><span class="etq {{ sev }}">{{ sev }}</span></td><td class="num"><b>{{ n }}</b></td></tr>
+{% endfor %}</table></div>
+{% else %}<div class="tarjeta"><span class="etq ok">Todo en orden</span> No hay errores abiertos.</div>{% endif %}
+{% endblock %}

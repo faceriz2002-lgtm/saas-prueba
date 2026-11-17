@@ -1,0 +1,11 @@
+{% extends "base.html" %}{% set seccion='salud' %}{% block titulo %}{{ desc }}{% endblock %}
+{% block cuerpo %}
+<p><a href="{{ url_for('salud') }}">← Salud de la cartera</a></p>
+<h1>{{ desc }}</h1><p><span class="etq {{ sev }}">{{ sev }}</span> <span class="nota">{{ filas|length }} casos abiertos</span></p>
+<div class="tarjeta tabla"><table>
+<tr><th>Elemento</th><th>Detalle</th><th>Desde</th></tr>
+{% for f in filas %}<tr>
+<td>{% set d = destino(f) %}{% if d %}<a href="{{ d }}">{{ f['ref'] }}</a>{% else %}{{ f['ref'] }}{% endif %}</td>
+<td>{{ f['detalle'] }}</td><td class="nota">{{ f['detectada'][:10]|fecha }}</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

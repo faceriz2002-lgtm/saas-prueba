@@ -1,0 +1,13 @@
+{% extends "base.html" %}{% set seccion='clientes' %}{% block titulo %}Clientes{% endblock %}
+{% block cuerpo %}
+<h1>Clientes</h1>
+<form method="get"><input type="search" name="q" value="{{ q }}" placeholder="Buscar por nombre, NIF o código"></form>
+<div class="tarjeta tabla"><table>
+<tr><th>Cliente</th><th>NIF/CIF</th><th class="num">Pólizas</th>{% if admin %}<th class="num">Errores</th>{% endif %}</tr>
+{% for c, nombre, npol, ninc in filas %}<tr>
+<td><a href="{{ url_for('cliente', cod=c['cod']) }}">{{ nombre }}</a><br><span class="nota">{{ c['cod'] }}</span></td>
+<td>{{ c['nif'] or '—' }}</td><td class="num">{{ npol }}</td>
+{% if admin %}<td class="num">{% if ninc %}<span class="etq media">{{ ninc }}</span>{% else %}<span class="etq ok">0</span>{% endif %}</td>{% endif %}</tr>
+{% else %}<tr><td colspan="4" class="vacio">Ningún cliente coincide.</td></tr>{% endfor %}
+</table></div>
+{% endblock %}

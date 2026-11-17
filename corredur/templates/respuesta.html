@@ -1,0 +1,10 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tu respuesta</title>
+<style>body{font:16px/1.5 system-ui,sans-serif;background:#f6f5f2;color:#1f2430;margin:0}main{max-width:480px;margin:0 auto;padding:24px}
+.c{background:#fff;border:1px solid #e5e3dd;border-radius:12px;padding:20px}h1{font-size:20px;margin:0 0 12px}.m{background:#1f4e79;color:#fff;padding:12px 20px;font-weight:700}
+button{padding:12px 18px;border:0;border-radius:9px;background:#1f4e79;color:#fff;font-size:16px;font-weight:600}.e{color:#b42318}</style></head><body>
+{% if info.despacho %}<div class="m">{{ info.despacho }}</div>{% endif %}<main><div class="c">
+{% if hecho %}<h1>¡Gracias!</h1><p>Hemos registrado tu respuesta: <b>{{ info.texto }}</b>. Nos pondremos en contacto contigo si hace falta algo más.</p>
+{% elif info.ok %}<h1>Confirma tu respuesta</h1><p>Seguro de {{ info.ramo|lower }} con {{ info.compania }}.</p><p>Has elegido: <b>{{ info.texto }}</b></p>
+<form method="post"><button type="submit">Confirmar</button></form>
+{% else %}<h1>No se puede registrar</h1><p class="e">{{ info.error }}</p>{% endif %}
+</div></main></body></html>

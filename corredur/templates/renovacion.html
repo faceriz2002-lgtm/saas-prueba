@@ -1,0 +1,45 @@
+{% extends "base.html" %}{% set seccion='renovaciones' %}{% block titulo %}Renovación {{ p['num_poliza'] }}{% endblock %}
+{% block cuerpo %}
+<p><a href="{{ url_for('renovaciones') }}">← Renovaciones</a></p>
+<h1>Renovación de {{ p['num_poliza'] }}</h1>
+<p><span class="etq {{ 'ok' if r['estado'] in ('enviada','respondida') else 'alta' if r['estado']=='preparada' else 'media' }}" data-reno-estado="{{ r['id'] }}">{{ ESTADOS[r['estado']] }}</span>
+ {{ TIPOS[r['tipo']] }} · <a href="{{ url_for('cliente', cod=c['cod']) }}">{{ nombre }}</a> · <a href="{{ url_for('poliza', num=p['num_poliza']) }}">ver póliza</a></p>
+{% if mensaje %}<div class="aviso {{ 'alta' if mensaje.startswith('No se envió') else '' }}"><b>{{ mensaje }}</b></div>{% endif %}
+<div class="aviso {{ 'alta' if r['tipo'] in ('bloqueada','fuera_plazo') else '' }}"><b>{{ TIPOS[r['tipo']] }}</b>{{ r['motivo'] }}</div>
+<div class="tarjeta"><dl>
+<dt>Vencimiento</dt><dd>{{ p['fecha_vencimiento']|fecha }} (en {{ dias }} días)</dd>
+<dt>Último día para cambiar</dt><dd>{{ limite|fecha }}</dd>
+<dt>{{ 'Precio de renovación' if p['prima_renovacion'] else 'Precio actual' }}</dt><dd><b>{{ r['referencia']|eur }}</b>{% if p['prima_renovacion'] %} <span class="nota">(antes {{ p['prima_total']|eur }})</span>{% endif %}</dd>
+<dt>Canales del cliente</dt><dd>Correo: {{ 'sí' if canales['email'] else 'no' }} · WhatsApp: {{ 'sí' if canales['whatsapp'] else 'no' }}</dd>
+</dl></div>
+{% if ops %}<h2>Opciones propuestas</h2>
+<div class="tarjeta tabla"><table><tr><th>Opción</th><th class="num">Prima</th><th class="num">Ahorro</th></tr>
+{% for o in ops %}<tr><td><b>{{ loop.index }} · {{ o.compania }}</b>{% if o.notas %}<br><span class="nota">{{ o.notas }}</span>{% endif %}</td><td class="num">{{ o.prima|eur }}</td><td class="num">{{ o.ahorro_eur|eur }} ({{ o.ahorro_pct }} %)</td></tr>{% endfor %}</table></div>
+<p class="nota">Máximo 3 opciones, ordenadas por precio, con un ahorro mínimo del {{ umbral|int }} %. Revisa las notas: la app compara precio, no coberturas.</p>{% endif %}
+
+{% if msg %}
+<h2>Lo que recibirá el cliente</h2>
+<div class="tarjeta"><b>Asunto:</b> {{ msg['asunto'] }}</div>
+{% if canales['email'] %}<div class="tarjeta" style="background:#fff">{{ msg['html']|safe }}</div>{% endif %}
+{% if canales['whatsapp'] %}<h2>WhatsApp</h2><div class="tarjeta" style="white-space:pre-wrap;background:#e7f6e4">{{ msg['wa'] }}</div>{% endif %}
+<p class="nota">Vista previa: los botones llevan a enlaces únicos que se generan al enviar, y caducan el {{ limite|fecha }}.</p>
+{% endif %}
+
+{% if r['estado']=='preparada' %}
+<h2>Aprobación</h2>
+<div class="tarjeta">
+{% if val %}<span class="etq ok">Texto validado</span> <span class="nota">por {{ validador }} el {{ val['validada_en'][:10]|fecha }}</span>
+{% else %}<span class="etq alta">Texto sin validar</span>
+ {% if admin %}<form method="post" action="{{ url_for('validar_texto', tipo=r['tipo']) }}" style="display:inline"><input type="hidden" name="volver" value="{{ r['id'] }}"><button class="btn sec" type="submit">Validar este texto</button></form>{% else %}<span class="nota">Lo debe validar el administrador.</span>{% endif %}{% endif %}
+<p>Nada se envía hasta que tú lo apruebes.</p>
+<div data-oculto-tras-enviar="{{ r['id'] }}">
+<form method="post" action="{{ url_for('aprobar', rid=r['id']) }}" data-aprobar="{{ r['id'] }}" data-poliza="{{ p['num_poliza'] }}" data-canales="{{ 'correo' if canales['email'] }}{{ ' y ' if canales['email'] and canales['whatsapp'] }}{{ 'WhatsApp' if canales['whatsapp'] }}">
+<button class="btn" type="submit" {% if impedimento %}disabled{% endif %}>Aprobar y enviar</button></form>
+{% if impedimento %}<p class="nota">{{ impedimento }}</p>{% endif %}</div>
+<div class="aviso" data-msg-enviado="{{ r['id'] }}" hidden><b>Enviado en modo simulado</b>Nada ha salido de la demo. Aquí conectaremos el envío real de correo y WhatsApp.</div>
+</div>
+{% endif %}
+{% if envios %}<h2>Enviado</h2><div class="tarjeta tabla"><table><tr><th>Canal</th><th>A</th><th>Cuándo</th></tr>
+{% for e in envios %}<tr><td>{{ e['canal'] }}</td><td>{{ e['destinatario'] }}</td><td>{{ e['enviado_en'][:16].replace('T',' ') }} <span class="etq">{{ e['modo'] }}</span></td></tr>{% endfor %}</table></div>{% endif %}
+{% if r['respuesta_accion'] %}<div class="aviso"><b>Respuesta del cliente: {{ r['respuesta_detalle'] }}</b>{{ r['respuesta_en'][:16].replace('T',' ') }}. Siguiente paso: preparar el mensaje para la compañía (próxima fase).</div>{% endif %}
+{% endblock %}

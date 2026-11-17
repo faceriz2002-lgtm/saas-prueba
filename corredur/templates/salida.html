@@ -1,0 +1,7 @@
+{% extends "base.html" %}{% set seccion='salida' %}{% block titulo %}Bandeja de salida{% endblock %}
+{% block cuerpo %}
+<h1>Bandeja de salida</h1><p class="nota">Todo lo enviado queda aquí. En la prueba el envío es simulado.</p>
+<div class="tarjeta tabla"><table><tr><th>Póliza</th><th>Canal</th><th>A</th><th>Cuándo</th></tr>
+{% for f in filas %}<tr><td><a href="{{ url_for('renovacion', rid=f['renovacion_id']) }}">{{ f['num_poliza'] }}</a></td><td>{{ f['canal'] }}</td><td>{{ f['destinatario'] }}</td><td>{{ f['enviado_en'][:16].replace('T',' ') }}</td></tr>
+{% else %}<tr><td colspan="4" class="vacio">Todavía no se ha enviado nada.</td></tr>{% endfor %}</table></div>
+{% endblock %}

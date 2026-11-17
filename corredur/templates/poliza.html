@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% set seccion='clientes' %}{% block titulo %}Póliza {{ p['num_poliza'] }}{% endblock %}
+{% block cuerpo %}
+{% if c %}<p><a href="{{ url_for('cliente', cod=c['cod']) }}">← {{ nombre }}</a></p>{% endif %}
+<h1>{{ p['num_poliza'] }}</h1>
+<p><span class="etq {{ '' if p['estado']=='En vigor' else 'alta' if p['estado'] in ('Anulada','Suspendida') else 'media' }}">{{ p['estado'] }}</span> {{ p['ramo'] }} · {{ p['compania'] }}</p>
+{% if p['estado'] in ('Anulada','Suspendida') %}<div class="aviso alta"><b>Póliza {{ p['estado']|lower }}</b>{{ p['motivo_anulacion'] or 'Sin motivo registrado.' }}{% if p['fecha_anulacion'] %} Desde el {{ p['fecha_anulacion']|fecha }}.{% endif %}</div>{% endif %}
+{% if p['no_en_ultimo_export'] %}<div class="aviso"><b>No aparece en el último export</b>La póliza se mantiene; no se borra nada automáticamente.</div>{% endif %}
+{% if p['estado']=='En vigor' and dias is not none and dias<0 %}<div class="aviso alta"><b>Figura en vigor pero venció hace {{ -dias }} días</b>Revisar si se renovó o hay que cambiar su estado.</div>
+{% elif p['estado']=='En vigor' and dias is not none and dias<=60 %}<div class="aviso"><b>Vence en {{ dias }} días</b>Entra en el plazo de renovación (60 días).</div>{% endif %}
+{% if sin %}<div class="aviso"><b>{{ sin|length }} siniestro{{ 's' if sin|length>1 }} en los últimos 2 años</b>Se tendrá en cuenta al tarificar.</div>{% endif %}
+{% if admin and incid %}<div class="aviso"><b>Errores de datos de esta póliza</b>{% for i in incid %}{{ i['regla'].replace('_',' ').lower() }}: {{ i['detalle'] }}{{ '; ' if not loop.last }}{% endfor %}</div>{% endif %}
+<div class="tarjeta"><dl>
+<dt>Producto</dt><dd>{{ p['producto'] or '—' }}</dd><dt>Efecto</dt><dd>{{ p['fecha_efecto']|fecha }}</dd><dt>Vencimiento</dt><dd>{{ p['fecha_vencimiento']|fecha }}</dd>
+<dt>Forma de pago</dt><dd>{{ p['forma_pago'] or '—' }}</dd><dt>Prima neta</dt><dd>{{ p['prima_neta']|eur }}</dd><dt>Impuestos y recargos</dt><dd>{{ p['impuestos']|eur }}</dd>
+<dt>Prima total anual</dt><dd><b>{{ p['prima_total']|eur }}</b></dd>
+{% if p['prima_renovacion'] %}<dt>Aviso de renovación</dt><dd>{{ p['prima_renovacion']|eur }} (avisó el {{ p['fecha_aviso']|fecha }}){% if p['prima_total'] %} · {{ '%+.1f'|format((p['prima_renovacion']/p['prima_total']-1)*100) }} %{% endif %}</dd>{% endif %}
+{% if admin %}<dt>Comisión</dt><dd>{{ p['comision_pct'] }} % · {{ p['comision_anual']|eur }} al año <span class="nota">(solo administrador)</span></dd>{% endif %}
+<dt>Mediador</dt><dd>{{ p['mediador'] or '—' }}</dd><dt>Origen</dt><dd>{{ p['origen'] or '—' }}</dd>
+</dl></div>
+{% if docs %}<p>{% for d in docs %}<a class="btn" href="{{ url_for('descargar_documento', cod=d['cod']) }}">Descargar póliza (PDF)</a> {% endfor %}</p>{% endif %}
+{% for tipo, datos in riesgos %}<h2>Riesgo: {{ tipo }}</h2><div class="tarjeta"><dl>{% for k, v in datos.items() %}<dt>{{ k.replace('_',' ').lower() }}</dt><dd>{{ v }}</dd>{% endfor %}</dl></div>{% endfor %}
+<h2>Garantías</h2><div class="tarjeta tabla"><table><tr><th>Garantía</th><th>Capital</th><th>Franquicia</th></tr>
+{% for g in gar %}{% if g['incluida']!=0 %}<tr><td>{{ g['garantia'] }}</td><td>{{ g['capital_limite'] or '—' }}</td><td>{{ g['franquicia'] or '—' }}</td></tr>{% endif %}{% else %}<tr><td colspan="3" class="vacio">Sin garantías.</td></tr>{% endfor %}</table></div>
+<h2>Recibos</h2><div class="tarjeta tabla"><table><tr><th>Recibo</th><th>Estado</th><th class="num">Total</th></tr>
+{% for r in recibos %}<tr><td>{{ r['num_recibo'] }}<br><span class="nota">{{ r['inicio_cobertura']|fecha }} – {{ r['fin_cobertura']|fecha }}</span></td>
+<td><span class="etq {{ 'alta' if r['estado_cobro'] in ('Devuelto','Impagado') else 'ok' if r['estado_cobro']=='Cobrado' else '' }}">{{ r['estado_cobro'] }}</span><br><span class="nota">cobra: {{ r['gestor_cobro'] or '—' }}</span></td>
+<td class="num">{{ r['prima_total']|eur }}</td></tr>{% else %}<tr><td colspan="3" class="vacio">Sin recibos.</td></tr>{% endfor %}</table></div>
+<h2>Siniestros (últimos 2 años)</h2><div class="tarjeta tabla">{% if sin %}<table><tr><th>Fecha</th><th>Tipo</th><th>Estado</th><th class="num">Pagado</th></tr>
+{% for s in sin %}<tr><td>{{ s['fecha_ocurrencia']|fecha }}</td><td>{{ s['tipo'] }}</td><td>{{ s['estado'] }}</td><td class="num">{{ s['importe_pagado']|eur }}</td></tr>{% endfor %}</table>{% else %}<span class="vacio">Sin siniestros en los últimos 2 años.</span>{% endif %}</div>
+{% if ofertas %}<h2>Ofertas anotadas a mano</h2><div class="tarjeta tabla"><table><tr><th>Compañía</th><th class="num">Prima</th><th>Notas</th></tr>
+{% for o in ofertas %}<tr><td>{{ o['compania_oferta'] }}</td><td class="num">{{ o['prima_total_anual']|eur }}</td><td class="nota">{{ o['notas_cobertura'] or '' }}</td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}
