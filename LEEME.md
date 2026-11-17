@@ -50,7 +50,7 @@ NIF/CIF inválido · NIF repetido · posible cliente duplicado · cliente sin co
 
 **Recibos devueltos (empleados y administrador).** En la ficha de cada póliza hay un formulario: fecha de devolución, importe, recibo (opcional) y motivo. Al registrarlo se avisa por correo a los administradores (en la prueba, el aviso queda en «Enviados → Avisos al despacho»), el recibo pasa a «Devuelto» y la renovación de esa póliza queda retenida hasta regularizarlo. No se aceptan fechas futuras, importes vacíos o negativos, motivos vacíos ni devoluciones repetidas.
 
-## Pruebas automáticas (74, todas superadas)
+## Pruebas automáticas (75, todas superadas)
 Las 25 nuevas cubren: cálculo sobre prima neta, herencia del estándar, % propio, recálculo al cambiar la prima, reimportación sin pisar lo puesto a mano, reparto con colaborador, porcentajes inválidos, permisos (el empleado no ve ni cambia comisiones), registro de devoluciones, avisos, retención de la renovación y rechazo de datos incorrectos.
 Incluyen una cartera limpia (0 errores), una cartera con 20 errores sembrados (se detectan exactamente esos y ninguno más), reimportación sin duplicados, cierre y reapertura de incidencias, aislamiento entre despachos y registro inmutable. Las pantallas se prueban con todas las fichas del ejemplo (44 clientes y 79 pólizas), los roles, las cifras en pantalla y el aislamiento entre despachos. Las renovaciones se prueban con escenarios construidos (umbrales, plazos, canales, retenciones, caducidad de enlaces) y contra un cálculo independiente con pandas sobre el ejemplo. Se rompieron reglas a propósito (el umbral de ahorro y la validación de textos) y las pruebas fallaron. La demo navegable, con aprobación y descargas, se probó en un navegador real sin pantalla. Para comprobar que las pruebas valen, rompí a propósito una regla y la prueba falló.
 
@@ -67,8 +67,9 @@ Incluyen una cartera limpia (0 errores), una cartera con 20 errores sembrados (s
 - Panel económico del administrador (clientes, primas, comisiones y margen) y liquidaciones con las compañías.
 
 ## Cómo ejecutarla
-    cd saas
-    python3 demo.py                 # carga el Excel y muestra el contador de salud
-    python3 exportar_demo.py        # genera demo.html con todas las pantallas
-    (los scripts leen el Excel de ejemplo de la carpeta superior: export_ejemplo_correduria.xlsx)
-    python3 -m pytest -q            # ejecuta las pruebas
+    pip install -r requirements.txt
+    python arrancar.py              # abre la aplicación en http://localhost:5000 con el Excel de ejemplo
+    python -m pytest -q             # ejecuta las pruebas (75)
+    python demo.py                  # carga el Excel y muestra el contador de salud
+    python exportar_demo.py         # genera demo.html con todas las pantallas
+Lo que hagas en la aplicación se guarda en datos_prueba.db; para empezar de cero, cierra la aplicación y borra ese archivo.

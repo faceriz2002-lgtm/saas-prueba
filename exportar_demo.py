@@ -70,7 +70,7 @@ async function descargar(cod){var d=DOCS[cod];if(!d)return;
  try{var dw=window.claude&&await window.claude.use('downloads');if(!dw){aviso('La descarga no está disponible en esta vista');return}
   var bin=atob(d.b),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
   await dw.save({filename:d.n,data:new Blob([u],{type:'application/pdf'})})}catch(err){if(!err||err.code!=='declined')aviso('No se pudo descargar el documento')}}
-document.addEventListener('submit',function(e){e.preventDefault();var f=e.target;var id=f.getAttribute('data-aprobar');if(!id)return;
+document.addEventListener('submit',function(e){e.preventDefault();var f=e.target;var id=f.getAttribute('data-aprobar');if(!id){aviso('En esta demo los formularios no guardan nada; en la aplicación sí');return}
  document.querySelectorAll('[data-reno-estado="'+id+'"]').forEach(function(x){x.textContent='Enviada';x.className='etq ok'});
  document.querySelectorAll('[data-oculto-tras-enviar="'+id+'"]').forEach(function(x){x.hidden=true});
  document.querySelectorAll('[data-msg-enviado="'+id+'"]').forEach(function(x){x.hidden=false});
